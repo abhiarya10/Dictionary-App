@@ -18,4 +18,4 @@ Recent Searches: The app maintains a history of recent word searches for users w
 User-Friendly UI: The app has a user-friendly and aesthetically pleasing user interface, with input fields, buttons, dropdowns, and suggestions for improved usability.
 
 Technologies Used:-
-React-Native, Flask
+React-Native, Flask, NLP
