@@ -1,0 +1,5 @@
+# Ignore Python's bytecode cache directory and its contents
+backend/__pycache__/
+
+# Ignore system-specific file
+frontend/%ProgramData%/Microsoft/Windows/UUS/State/_active.uusver
