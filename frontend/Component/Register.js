@@ -81,7 +81,7 @@ export default function Register() {
       password == confirmPassword
     ) {
       fetch(
-        "https://3d8e-2402-e280-3e4b-4e2-ad88-4729-82fb-15fd.ngrok-free.app/registration",
+        "https://3db3-2402-e280-3e4b-4e2-5584-63b4-2ea8-79e8.ngrok-free.app/registration",
         {
           method: "POST",
           headers: {

@@ -13,7 +13,9 @@ import React, { useState, useEffect } from "react";
 import { Picker } from "@react-native-picker/picker";
 import Icon from "react-native-vector-icons/FontAwesome";
 
-export default function Dictionary({ navigation, username }) {
+import ImageSearch from "./ImageSearch";
+
+export default function Dictionary({ route, navigation, username }) {
   const [input, setInput] = useState("");
   const [word, setWord] = useState("");
   const [englishMeaning, setEnglishMeaning] = useState("");
@@ -45,7 +47,7 @@ export default function Dictionary({ navigation, username }) {
 
     // Fetch suggestions based on input
     fetch(
-      `https://3d8e-2402-e280-3e4b-4e2-ad88-4729-82fb-15fd.ngrok-free.app/api/suggestions/${selectedLanguage}/${searchWord}`
+      `https://3db3-2402-e280-3e4b-4e2-5584-63b4-2ea8-79e8.ngrok-free.app/api/suggestions/${selectedLanguage}/${searchWord}`
     )
       .then((resp) => resp.json())
       .then((data) => {
@@ -57,16 +59,12 @@ export default function Dictionary({ navigation, username }) {
       });
   }
 
-  function advanceSearchHandler() {
-    navigation.navigate("Advanced Search");
-  }
-
   //search from database
   function searchHandler() {
     if (input) {
       setWord("");
       fetch(
-        `https://3d8e-2402-e280-3e4b-4e2-ad88-4729-82fb-15fd.ngrok-free.app/api/${selectedLanguage}/${input}`,
+        `https://3db3-2402-e280-3e4b-4e2-5584-63b4-2ea8-79e8.ngrok-free.app/api/${selectedLanguage}/${input}`,
         {
           method: "GET",
           headers: {
@@ -111,7 +109,7 @@ export default function Dictionary({ navigation, username }) {
         };
 
         fetch(
-          "https://3d8e-2402-e280-3e4b-4e2-ad88-4729-82fb-15fd.ngrok-free.app/history",
+          "https://3db3-2402-e280-3e4b-4e2-5584-63b4-2ea8-79e8.ngrok-free.app/history",
           {
             method: "POST",
             headers: {
@@ -135,7 +133,7 @@ export default function Dictionary({ navigation, username }) {
   useEffect(() => {
     if (username) {
       fetch(
-        "https://3d8e-2402-e280-3e4b-4e2-ad88-4729-82fb-15fd.ngrok-free.app/recent",
+        "https://3db3-2402-e280-3e4b-4e2-5584-63b4-2ea8-79e8.ngrok-free.app/recent",
         {
           method: "POST",
           headers: {
@@ -274,12 +272,7 @@ export default function Dictionary({ navigation, username }) {
         <TouchableOpacity style={styles.searchButton} onPress={searchHandler}>
           <Text style={styles.textButton}>Search</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.advancedSearch}
-          onPress={() => navigation.navigate("Advanced Search")}
-        >
-          <Text style={styles.advancedSearchText}>Advanced Search</Text>
-        </TouchableOpacity>
+        <ImageSearch />
       </View>
 
       <View style={[styles.meaningContainer, styles.elevation]}>
@@ -430,17 +423,6 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  advancedSearch: {
-    marginLeft: 30,
-    paddingTop: 10,
-    borderBottomWidth: 1,
-  },
-  advancedSearchText: {
-    fontSize: 17,
-    fontWeight: "800",
-    //color: "rgba(57, 57, 1, 1)",
-    letterSpacing: 0.5,
   },
 
   meaningContainer: {

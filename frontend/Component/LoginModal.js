@@ -70,7 +70,7 @@ export default function LoginModal({
       };
 
       fetch(
-        "https://3d8e-2402-e280-3e4b-4e2-ad88-4729-82fb-15fd.ngrok-free.app/login",
+        "https://3db3-2402-e280-3e4b-4e2-5584-63b4-2ea8-79e8.ngrok-free.app/login",
         {
           method: "POST",
           headers: {
@@ -226,6 +226,8 @@ const styles = StyleSheet.create({
 
     backgroundColor: "rgba(255, 255, 224, 1)",
     borderWidth: 2,
+    elevation: 5,
+    borderColor: "white",
   },
 
   forgotPasswordContainer: {

@@ -5,6 +5,10 @@ from datetime import datetime
 import spacy
 from spacy.lang.en import English
 
+from PIL import Image
+from transformers import BlipProcessor, BlipForConditionalGeneration
+
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/dictionarydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -12,6 +16,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 app.app_context().push()
+
+processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-large")
+model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-large")
+
 
 class DictionaryWords(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -189,7 +197,41 @@ def login():
         return userRegistered_schema.jsonify(user)
     else:
         return jsonify({'error': 'Invalid Login'})
-    
+
+
+# image code
+
+@app.route('/image-upload', methods=['POST'])
+def upload_image():
+    if "image" in request.files:
+        # Get the uploaded image
+        uploaded_image = request.files["image"]
+        if uploaded_image.filename != "":
+            # Process the image here (e.g., image captioning)
+            raw_image = Image.open(uploaded_image).convert('RGB')
+            caption=recognize_image(raw_image)
+            print(f"Image caption: {caption}")  # Print the caption for debugging
+
+            return jsonify({"message": caption})
+
+    return jsonify({"error": "No image uploaded"})
+
+
+def recognize_image(raw_image):
+    try:
+       
+        # Perform image captioning
+        inputs = processor(raw_image, return_tensors="pt")
+        output = model.generate(**inputs)
+
+        # Decode and return the recognized text
+        recognized_text = processor.decode(output[0], skip_special_tokens=True)
+        return recognized_text
+
+    except Exception as e:
+        return 'error occured'
+
+  
 
 if __name__ == "__main__":
     app.run(port= 3000, debug=True)

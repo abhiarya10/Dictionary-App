@@ -24,11 +24,6 @@ function DictionaryStack({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [username, setUsername] = useState("");
 
-  useEffect(() => {
-    // This effect will run whenever the username changes
-    console.log("from dictionary stack: ", username);
-  }, [username]);
-
   function parentModalUsername(recieveUsername) {
     setUsername(recieveUsername);
   }
@@ -113,6 +108,7 @@ export default function App() {
         <Drawer.Screen name="My Dictionary" component={DictionaryStack} />
         <Drawer.Screen name="About us" component={About} />
         <Drawer.Screen name="Contact us" component={Contact} />
+        <Drawer.Screen name="Advanced Search" component={AdvanceSearch} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
