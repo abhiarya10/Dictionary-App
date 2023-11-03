@@ -81,7 +81,7 @@ export default function Register() {
       password == confirmPassword
     ) {
       fetch(
-        "https://3db3-2402-e280-3e4b-4e2-5584-63b4-2ea8-79e8.ngrok-free.app/registration",
+        "https://7871-2402-e280-3e4b-4e2-2164-be1f-d5c7-8697.ngrok-free.app/registration",
         {
           method: "POST",
           headers: {
@@ -182,14 +182,14 @@ const styles = StyleSheet.create({
   },
 
   input: {
-    paddingTop: 20,
-    paddingBottom: 5,
+    paddingTop: 12,
+    paddingBottom: 12,
     paddingHorizontal: 5,
     marginVertical: 10,
     fontSize: 18,
     fontWeight: "400",
     letterSpacing: 0.5,
-    borderBottomWidth: 1,
+    borderWidth: 1,
   },
 
   registerButton: {

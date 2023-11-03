@@ -4,6 +4,7 @@ from flask_marshmallow import Marshmallow
 from datetime import datetime 
 import spacy
 from spacy.lang.en import English
+import pandas as pd
 
 from PIL import Image
 from transformers import BlipProcessor, BlipForConditionalGeneration
@@ -23,17 +24,18 @@ model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-capt
 
 class DictionaryWords(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    language = db.Column(db.String(30), nullable=False)
-    word = db.Column(db.String(100), nullable=False)
-    english_meaning = db.Column(db.String(100), nullable=False)
-    hindi_meaning = db.Column(db.String(100), nullable=False)
-    sanskrit_meaning = db.Column(db.String(100), nullable=False)
-    chinese_meaning = db.Column(db.String(100), nullable=False)
-    marathi_meaning = db.Column(db.String(100), nullable=False)
-    pos = db.Column(db.String(100), nullable=False)
+    language = db.Column(db.String(30), nullable=True)
+    word = db.Column(db.String(100), nullable=True)
+    english_meaning = db.Column(db.String(100), nullable=True)
+    hindi_meaning = db.Column(db.String(100), nullable=True)
+    sanskrit_meaning = db.Column(db.String(100), nullable=True)
+    chinese_meaning = db.Column(db.String(100), nullable=True)
+    marathi_meaning = db.Column(db.String(100), nullable=True)
+    tibetan_meaning = db.Column(db.String(100), nullable=True)
+    pos = db.Column(db.String(100), nullable=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __init__(self, language, word, english_meaning,hindi_meaning,sanskrit_meaning,chinese_meaning,marathi_meaning,pos):
+    def __init__(self, language, word, english_meaning,hindi_meaning,sanskrit_meaning,chinese_meaning,marathi_meaning,tibetan_meaning,pos):
         self.language = language
         self.word = word
         self.english_meaning = english_meaning
@@ -41,6 +43,7 @@ class DictionaryWords(db.Model):
         self.sanskrit_meaning = sanskrit_meaning
         self.chinese_meaning = chinese_meaning
         self.marathi_meaning = marathi_meaning
+        self.tibetan_meaning = tibetan_meaning
         self.pos = pos
 
 class UserRegisterd(db.Model):
@@ -72,7 +75,7 @@ class SearchHistory(db.Model):
 
 class DictionaryWordSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'language', 'word', 'english_meaning','hindi_meaning','sanskrit_meaning','chinese_meaning','marathi_meaning', 'pos', 'date_created')
+        fields = ('id', 'language', 'word', 'english_meaning','hindi_meaning','sanskrit_meaning','chinese_meaning','marathi_meaning','tibetan_meaning', 'pos', 'date_created')
 dictionarywords_schema = DictionaryWordSchema()
 dictionarywords_schemas = DictionaryWordSchema(many=True)
 
@@ -231,7 +234,41 @@ def recognize_image(raw_image):
     except Exception as e:
         return 'error occured'
 
-  
+  #adding data in database from excel
+@app.route('/import-data', methods=['POST'])
+def import_data():
+    try:
+        # Specify the path to your Excel file
+        excel_file_path = "C:/Users/abhi2/Desktop/a.xlsx"
+
+        # Read data from Excel using pandas
+        df = pd.read_excel(excel_file_path)
+
+        # Iterate through the rows and add each record to the database
+        for index, row in df.iterrows():
+            new_word = DictionaryWords(
+                language=row['Language'],
+                word=row['Word'],
+                english_meaning=row['English Meaning'],
+                hindi_meaning=row['Hindi Meaning'],
+                sanskrit_meaning=row['Sanskrit Meaning'],
+                chinese_meaning=row['Chinese Meaning'],
+                marathi_meaning=row['Marathi Meaning'],
+                tibetan_meaning=row['Tibetan Meaning'],
+                pos=row['Pos'],
+            )
+
+            db.session.add(new_word)
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        return jsonify({"message": "Data imported successfully"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
 
 if __name__ == "__main__":
     app.run(port= 3000, debug=True)

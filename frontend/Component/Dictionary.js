@@ -23,6 +23,7 @@ export default function Dictionary({ route, navigation, username }) {
   const [sanskritMeaning, setSanskritMeaning] = useState("");
   const [chineseMeaning, setChineseMeaning] = useState("");
   const [marathiMeaning, setMarathiMeaning] = useState("");
+  const [tibetanMeaning, setTibetanMeaning] = useState("");
   const [pos, setPos] = useState("");
   const [selectedLanguage, setSelecteLanguage] = useState("en");
   const [suggestions, setSuggestions] = useState([]);
@@ -47,7 +48,7 @@ export default function Dictionary({ route, navigation, username }) {
 
     // Fetch suggestions based on input
     fetch(
-      `https://3db3-2402-e280-3e4b-4e2-5584-63b4-2ea8-79e8.ngrok-free.app/api/suggestions/${selectedLanguage}/${searchWord}`
+      `https://7871-2402-e280-3e4b-4e2-2164-be1f-d5c7-8697.ngrok-free.app/api/suggestions/${selectedLanguage}/${searchWord}`
     )
       .then((resp) => resp.json())
       .then((data) => {
@@ -64,7 +65,7 @@ export default function Dictionary({ route, navigation, username }) {
     if (input) {
       setWord("");
       fetch(
-        `https://3db3-2402-e280-3e4b-4e2-5584-63b4-2ea8-79e8.ngrok-free.app/api/${selectedLanguage}/${input}`,
+        `https://7871-2402-e280-3e4b-4e2-2164-be1f-d5c7-8697.ngrok-free.app/api/${selectedLanguage}/${input}`,
         {
           method: "GET",
           headers: {
@@ -85,6 +86,7 @@ export default function Dictionary({ route, navigation, username }) {
             setSanskritMeaning(data.sanskrit_meaning);
             setChineseMeaning(data.chinese_meaning);
             setMarathiMeaning(data.marathi_meaning);
+            setTibetanMeaning(data.tibetan_meaning);
             setPos(data.pos);
             console.log("Search words:- ", data); // Handle the response data from the backend if needed
           }
@@ -109,7 +111,7 @@ export default function Dictionary({ route, navigation, username }) {
         };
 
         fetch(
-          "https://3db3-2402-e280-3e4b-4e2-5584-63b4-2ea8-79e8.ngrok-free.app/history",
+          "https://7871-2402-e280-3e4b-4e2-2164-be1f-d5c7-8697.ngrok-free.app/history",
           {
             method: "POST",
             headers: {
@@ -133,7 +135,7 @@ export default function Dictionary({ route, navigation, username }) {
   useEffect(() => {
     if (username) {
       fetch(
-        "https://3db3-2402-e280-3e4b-4e2-5584-63b4-2ea8-79e8.ngrok-free.app/recent",
+        "https://7871-2402-e280-3e4b-4e2-2164-be1f-d5c7-8697.ngrok-free.app/recent",
         {
           method: "POST",
           headers: {
@@ -169,6 +171,9 @@ export default function Dictionary({ route, navigation, username }) {
     if (selectedLanguage == "mr") {
       setLanguageDropdown("Marathi");
     }
+    if (selectedLanguage == "ti") {
+      setLanguageDropdown("Tibetan");
+    }
     setWord("");
     setPos("");
     setEnglishMeaning("");
@@ -176,6 +181,7 @@ export default function Dictionary({ route, navigation, username }) {
     setSanskritMeaning("");
     setChineseMeaning("");
     setMarathiMeaning("");
+    setTibetanMeaning("");
   }, [selectedLanguage]);
 
   function languageMeaningHandler(language) {
@@ -187,38 +193,6 @@ export default function Dictionary({ route, navigation, username }) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  /* //search from api
-  function searchHandlerAPI() {
-    fetch(
-      `https://api.dictionaryapi.dev/api/v2/entries/${selectedLanguage}/${input}`
-    )
-      .then((resp) => resp.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          const meaning = capitalizeWord(
-            data[0].meanings[0].definitions[0].definition
-          );
-          const word = capitalizeWord(data[0].word);
-          const pos = capitalizeWord(data[0].meanings[0].partOfSpeech);
-
-          setWord(word);
-          setMeaning(meaning);
-          setPos(pos);
-          console.log(data);
-        } else {
-          setWord("Word not found");
-          setMeaning("");
-          setPos("");
-        }
-      })
-      .catch(function (error) {
-        console.log(
-          "There has been a problem with your fetch operation: " + error.message
-        );
-        // Set the error state with a message
-      });
-    setInput("");
-  } */
   return (
     <View style={styles.mainContainer}>
       <View style={styles.pickerView}>
@@ -237,6 +211,7 @@ export default function Dictionary({ route, navigation, username }) {
           <Picker.Item label="Sanskrit" value="sa" />
           <Picker.Item label="Chinese" value="zh" />
           <Picker.Item label="Marathi" value="mr" />
+          <Picker.Item label="Tibetan" value="ti" />
         </Picker>
       </View>
 
@@ -287,6 +262,7 @@ export default function Dictionary({ route, navigation, username }) {
           {languageDropdown === "Sansk.." && sanskritMeaning}
           {languageDropdown === "Chinese" && chineseMeaning}
           {languageDropdown === "Marathi" && marathiMeaning}
+          {languageDropdown === "Tibetan" && tibetanMeaning}
         </Text>
       </View>
       <TouchableOpacity
@@ -330,6 +306,12 @@ export default function Dictionary({ route, navigation, username }) {
             onPress={() => languageMeaningHandler("Marathi")}
           >
             <Text style={styles.dropdownLanguageText}>Marathi</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.dropdownLanguageField}
+            onPress={() => languageMeaningHandler("Tibetan")}
+          >
+            <Text style={styles.dropdownLanguageText}>Tibetan</Text>
           </TouchableOpacity>
         </View>
       )}
