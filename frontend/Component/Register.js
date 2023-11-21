@@ -6,8 +6,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useState, useRef } from "react";
+import { useRoute } from "@react-navigation/native";
 
-export default function Register() {
+export default function Register({ navigation, toggleModal }) {
+  const route = useRoute(); // Get the route object
+
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,6 +40,11 @@ export default function Register() {
   function confirmPasswordHandler(event) {
     const trimedConfirmPassword = event.trim();
     setConfirmPassword(trimedConfirmPassword);
+  }
+
+  function clickToLoginHandler() {
+    navigation.goBack();
+    route.params.toggleModal();
   }
 
   function registerHandler() {
@@ -114,51 +122,68 @@ export default function Register() {
     <View style={styles.container}>
       <Text style={styles.message}>{registrationMessage}</Text>
       <View style={styles.form}>
-        <TextInput
-          ref={usernameRef}
-          style={[styles.input, { borderColor: usernameBorder }]}
-          defaultValue={username}
-          placeholder="Username"
-          onChangeText={usernameHandler}
-          onFocus={() => setUserNameBorder("black")}
-        />
-        <TextInput
-          ref={emailRef}
-          style={[styles.input, { borderColor: emailBorder }]}
-          defaultValue={email}
-          placeholder="Email"
-          onChangeText={emailHandler}
-          onFocus={() => setEmialBorder("black")}
-          autoCapitalize="none"
-          inputMode="email"
-        />
-        <TextInput
-          ref={passwordRef}
-          style={[styles.input, { borderColor: passwordBorder }]}
-          defaultValue={password}
-          placeholder="Password"
-          onChangeText={passwordHandler}
-          onFocus={() => setPasswordBorder("black")}
-          inputMode="numeric"
-          secureTextEntry={true}
-        />
-        <TextInput
-          ref={confirmPasswordRef}
-          style={[styles.input, { borderColor: confirmPasswordBorder }]}
-          defaultValue={confirmPassword}
-          placeholder="Confirm password"
-          onChangeText={confirmPasswordHandler}
-          onFocus={() => setConfirmPasswordBorder("black")}
-          inputMode="numeric"
-          secureTextEntry={true}
-        />
-
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>Username</Text>
+          <TextInput
+            ref={usernameRef}
+            style={[styles.input, { borderColor: usernameBorder }]}
+            defaultValue={username}
+            placeholder="Enter your username"
+            onChangeText={usernameHandler}
+            onFocus={() => setUserNameBorder("black")}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>Email</Text>
+          <TextInput
+            ref={emailRef}
+            style={[styles.input, { borderColor: emailBorder }]}
+            defaultValue={email}
+            placeholder="Enter your email"
+            onChangeText={emailHandler}
+            onFocus={() => setEmialBorder("black")}
+            autoCapitalize="none"
+            inputMode="email"
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>Password</Text>
+          <TextInput
+            ref={passwordRef}
+            style={[styles.input, { borderColor: passwordBorder }]}
+            defaultValue={password}
+            placeholder="Enter password"
+            onChangeText={passwordHandler}
+            onFocus={() => setPasswordBorder("black")}
+            inputMode="numeric"
+            secureTextEntry={true}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>Confirm Password</Text>
+          <TextInput
+            ref={confirmPasswordRef}
+            style={[styles.input, { borderColor: confirmPasswordBorder }]}
+            defaultValue={confirmPassword}
+            placeholder="Confirm password"
+            onChangeText={confirmPasswordHandler}
+            onFocus={() => setConfirmPasswordBorder("black")}
+            inputMode="numeric"
+            secureTextEntry={true}
+          />
+        </View>
         <TouchableOpacity
           style={styles.registerButton}
           onPress={registerHandler}
         >
           <Text style={styles.registerText}>Register</Text>
         </TouchableOpacity>
+        <View style={styles.loginContainer}>
+          <Text style={styles.loginLabel}>Already have an account?</Text>
+          <TouchableOpacity onPress={clickToLoginHandler}>
+            <Text style={styles.loginLink}>Click to login</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -184,21 +209,29 @@ const styles = StyleSheet.create({
   input: {
     paddingTop: 12,
     paddingBottom: 12,
-    paddingHorizontal: 5,
-    marginVertical: 10,
-    fontSize: 18,
+    paddingHorizontal: 10,
+    fontSize: 17,
     fontWeight: "400",
     letterSpacing: 0.5,
     borderWidth: 1,
+    borderRadius: 10,
+    backgroundColor: "#FBFAF5",
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 18,
+    fontWeight: "400",
   },
 
   registerButton: {
-    marginTop: 25,
+    marginTop: 7,
     width: "32%",
     padding: 13,
     alignItems: "center",
     backgroundColor: "rgba(57, 57, 1, 1)",
-    borderRadius: 3,
+    borderRadius: 10,
     elevation: 5,
     shadowColor: "#171717",
   },
@@ -208,5 +241,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     letterSpacing: 0.5,
+  },
+  loginContainer: {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 17,
+  },
+  loginLabel: {
+    fontSize: 15,
+  },
+  loginLink: {
+    fontSize: 15,
+    marginLeft: 5,
+    fontWeight: "500",
+    borderBottomWidth: 1,
   },
 });

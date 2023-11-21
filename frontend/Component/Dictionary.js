@@ -17,14 +17,20 @@ import ImageSearch from "./ImageSearch";
 
 export default function Dictionary({ route, navigation, username }) {
   const [input, setInput] = useState("");
-  const [word, setWord] = useState("");
+  const [englishWord, setEnglishWord] = useState("");
   const [englishMeaning, setEnglishMeaning] = useState("");
+  const [hindiWord, setHindiWord] = useState("");
   const [hindiMeaning, setHindiMeaning] = useState("");
+  const [sanskritWord, setSanskritWord] = useState("");
   const [sanskritMeaning, setSanskritMeaning] = useState("");
+  const [chineseWord, setChineseWord] = useState("");
   const [chineseMeaning, setChineseMeaning] = useState("");
+  const [marathiWord, setMarathiWord] = useState("");
   const [marathiMeaning, setMarathiMeaning] = useState("");
+  const [tibetanWord, setTibetanWord] = useState("");
   const [tibetanMeaning, setTibetanMeaning] = useState("");
-  const [pos, setPos] = useState("");
+  const [word, setWord] = useState("");
+
   const [selectedLanguage, setSelecteLanguage] = useState("en");
   const [suggestions, setSuggestions] = useState([]);
   const [recent, setRecent] = useState([]);
@@ -48,7 +54,7 @@ export default function Dictionary({ route, navigation, username }) {
 
     // Fetch suggestions based on input
     fetch(
-      `https://7871-2402-e280-3e4b-4e2-2164-be1f-d5c7-8697.ngrok-free.app/api/suggestions/${selectedLanguage}/${searchWord}`
+      `https://2c00-2409-40e4-2b-ba40-b1be-1e77-1a0f-5b1e.ngrok-free.app/api/suggestions/${selectedLanguage}/${searchWord}`
     )
       .then((resp) => resp.json())
       .then((data) => {
@@ -65,7 +71,7 @@ export default function Dictionary({ route, navigation, username }) {
     if (input) {
       setWord("");
       fetch(
-        `https://7871-2402-e280-3e4b-4e2-2164-be1f-d5c7-8697.ngrok-free.app/api/${selectedLanguage}/${input}`,
+        `https://2c00-2409-40e4-2b-ba40-b1be-1e77-1a0f-5b1e.ngrok-free.app/api/${selectedLanguage}/${input}`,
         {
           method: "GET",
           headers: {
@@ -77,17 +83,19 @@ export default function Dictionary({ route, navigation, username }) {
         .then((data) => {
           if (data.error) {
             setWord("Word not found");
-            setMeaning("");
-            setPos("");
           } else {
-            setWord(data.word);
+            setEnglishWord(data.english_word);
             setEnglishMeaning(data.english_meaning);
+            setHindiWord(data.hindi_word);
             setHindiMeaning(data.hindi_meaning);
+            setSanskritWord(data.sanskrit_word);
             setSanskritMeaning(data.sanskrit_meaning);
+            setChineseWord(data.chinese_word);
             setChineseMeaning(data.chinese_meaning);
+            setMarathiWord(data.marathi_word);
             setMarathiMeaning(data.marathi_meaning);
+            setTibetanWord(data.tibetan_word);
             setTibetanMeaning(data.tibetan_meaning);
-            setPos(data.pos);
             console.log("Search words:- ", data); // Handle the response data from the backend if needed
           }
         })
@@ -175,7 +183,6 @@ export default function Dictionary({ route, navigation, username }) {
       setLanguageDropdown("Tibetan");
     }
     setWord("");
-    setPos("");
     setEnglishMeaning("");
     setHindiMeaning("");
     setSanskritMeaning("");
@@ -233,11 +240,30 @@ export default function Dictionary({ route, navigation, username }) {
               key={suggestion.id}
               style={styles.suggestionItem}
               onPress={() => {
-                setInput(suggestion.word);
+                if (selectedLanguage === "en") {
+                  setInput(suggestion.english_word);
+                } else if (selectedLanguage === "hi") {
+                  setInput(suggestion.hindi_word);
+                } else if (selectedLanguage === "zh") {
+                  setInput(suggestion.chinese_word);
+                } else if (selectedLanguage === "sa") {
+                  setInput(suggestion.sanskrit_word);
+                } else if (selectedLanguage === "mr") {
+                  setInput(suggestion.marathi_word);
+                } else if (selectedLanguage === "ti") {
+                  setInput(suggestion.tibetan_word);
+                }
                 setSuggestions([]); // Clear suggestions
               }}
             >
-              <Text style={styles.suggestionText}>{suggestion.word}</Text>
+              <Text style={styles.suggestionText}>
+                {selectedLanguage === "en" && suggestion.english_word}
+                {selectedLanguage === "hi" && suggestion.hindi_word}
+                {selectedLanguage === "zh" && suggestion.chinese_word}
+                {selectedLanguage === "sa" && suggestion.sanskrit_word}
+                {selectedLanguage === "mr" && suggestion.marathi_word}
+                {selectedLanguage === "ti" && suggestion.tibetan_word}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -249,8 +275,32 @@ export default function Dictionary({ route, navigation, username }) {
         </TouchableOpacity>
         <ImageSearch />
       </View>
+      <View style={styles.wordMeaningBox}>
+        <View style={styles.wordBox}>
+          <Text style={styles.baseWordMeaning}>Word</Text>
+          <View style={styles.wordMeaningView}>
+            <Text style={styles.baseWordText}>{englishWord}</Text>
+            <Text style={styles.baseWordText}>{hindiWord}</Text>
+            <Text style={styles.baseWordText}>{chineseWord}</Text>
+            <Text style={styles.baseWordText}>{tibetanWord}</Text>
+            <Text style={styles.baseWordText}>{sanskritWord}</Text>
+            <Text style={styles.baseWordText}>{marathiWord}</Text>
+          </View>
+        </View>
+        <View style={styles.meaningBox}>
+          <Text style={styles.baseWordMeaning}>Meaning</Text>
+          <View style={styles.wordMeaningView}>
+            <Text style={styles.baseWordText}>{englishMeaning}</Text>
+            <Text style={styles.baseWordText}>{hindiMeaning}</Text>
+            <Text style={styles.baseWordText}>{chineseMeaning}</Text>
+            <Text style={styles.baseWordText}>{tibetanMeaning}</Text>
+            <Text style={styles.baseWordText}>{sanskritMeaning}</Text>
+            <Text style={styles.baseWordText}>{marathiMeaning}</Text>
+          </View>
+        </View>
+      </View>
 
-      <View style={[styles.meaningContainer, styles.elevation]}>
+      {/* <View style={[styles.meaningContainer, styles.elevation]}>
         <View style={styles.wordContainer}>
           <Text style={styles.wordText}>{word}</Text>
         </View>
@@ -264,8 +314,8 @@ export default function Dictionary({ route, navigation, username }) {
           {languageDropdown === "Marathi" && marathiMeaning}
           {languageDropdown === "Tibetan" && tibetanMeaning}
         </Text>
-      </View>
-      <TouchableOpacity
+      </View> */}
+      {/* <TouchableOpacity
         style={styles.meaningLanguageContainer}
         onPress={() => setLanguageDropdownView(!languageDropdownView)}
       >
@@ -273,9 +323,9 @@ export default function Dictionary({ route, navigation, username }) {
           <Text style={styles.meaningLanguageText}>{languageDropdown}</Text>
           <Icon name="caret-down" color="rgba(57, 57, 1, 1)" size={20} />
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
-      {languageDropdownView && (
+      {/* {languageDropdownView && (
         <View style={styles.dropdownView}>
           <TouchableOpacity
             style={styles.dropdownLanguageField}
@@ -314,7 +364,7 @@ export default function Dictionary({ route, navigation, username }) {
             <Text style={styles.dropdownLanguageText}>Tibetan</Text>
           </TouchableOpacity>
         </View>
-      )}
+      )} */}
 
       <View style={styles.recentContainer}>
         <Text style={styles.recentText}>Recents</Text>
@@ -407,6 +457,49 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  wordMeaningBox: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-evenly",
+    width: "100%",
+    height: 270,
+    marginTop: 20,
+    borderRadius: 5,
+    backgroundColor: "rgba(255, 255, 224, 1)",
+    elevation: 5,
+    shadowColor: "#52006A",
+  },
+  wordBox: {
+    width: "47%",
+    height: "94%",
+    paddingTop: 5,
+    backgroundColor: "#D3D8D4",
+    borderRadius: 3,
+  },
+  meaningBox: {
+    width: "47%",
+    height: "94%",
+    paddingTop: 5,
+    backgroundColor: "#EEE7D2",
+    borderRadius: 3,
+  },
+
+  baseWordMeaning: {
+    backgroundColor: "white",
+    padding: 5,
+    textAlign: "center",
+    fontSize: 17,
+  },
+
+  wordMeaningView: {
+    padding: 10,
+  },
+
+  baseWordText: {
+    margin: 4,
+    fontSize: 16,
+  },
   meaningContainer: {
     marginTop: 50,
     height: 220,
@@ -488,7 +581,7 @@ const styles = StyleSheet.create({
     fontWeight: "400",
   },
   recentContainer: {
-    height: 240,
+    height: 220,
     marginTop: 16,
     backgroundColor: "rgba(255, 255, 224, 1)",
     borderRadius: 5,

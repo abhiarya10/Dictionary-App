@@ -24,27 +24,33 @@ model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-capt
 
 class DictionaryWords(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    language = db.Column(db.String(30), nullable=True)
-    word = db.Column(db.String(100), nullable=True)
-    english_meaning = db.Column(db.String(100), nullable=True)
+    english_word = db.Column(db.String(100), nullable=True)
+    english_meaning = db.Column(db.String(200), nullable=True)
+    hindi_word = db.Column(db.String(100), nullable=True)
     hindi_meaning = db.Column(db.String(100), nullable=True)
-    sanskrit_meaning = db.Column(db.String(100), nullable=True)
+    chinese_word = db.Column(db.String(100), nullable=True)
     chinese_meaning = db.Column(db.String(100), nullable=True)
-    marathi_meaning = db.Column(db.String(100), nullable=True)
+    tibetan_word = db.Column(db.String(100), nullable=True)
     tibetan_meaning = db.Column(db.String(100), nullable=True)
-    pos = db.Column(db.String(100), nullable=True)
+    marathi_word = db.Column(db.String(100), nullable=True)
+    marathi_meaning = db.Column(db.String(100), nullable=True)
+    sanskrit_word = db.Column(db.String(100), nullable=True)
+    sanskrit_meaning = db.Column(db.String(100), nullable=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __init__(self, language, word, english_meaning,hindi_meaning,sanskrit_meaning,chinese_meaning,marathi_meaning,tibetan_meaning,pos):
-        self.language = language
-        self.word = word
+    def __init__(self, english_word, english_meaning, hindi_word, hindi_meaning, chinese_word, chinese_meaning, marathi_word, marathi_meaning, tibetan_word, tibetan_meaning, sanskrit_word, sanskrit_meaning):
+        self.english_word = english_word
         self.english_meaning = english_meaning
+        self.hindi_word = hindi_word
         self.hindi_meaning = hindi_meaning
-        self.sanskrit_meaning = sanskrit_meaning
+        self.chinese_word = chinese_word
         self.chinese_meaning = chinese_meaning
-        self.marathi_meaning = marathi_meaning
+        self.tibetan_word = tibetan_word
         self.tibetan_meaning = tibetan_meaning
-        self.pos = pos
+        self.marathi_word = marathi_word
+        self.marathi_meaning = marathi_meaning
+        self.sanskrit_word = sanskrit_word
+        self.sanskrit_meaning = sanskrit_meaning
 
 class UserRegisterd(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -75,7 +81,7 @@ class SearchHistory(db.Model):
 
 class DictionaryWordSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'language', 'word', 'english_meaning','hindi_meaning','sanskrit_meaning','chinese_meaning','marathi_meaning','tibetan_meaning', 'pos', 'date_created')
+        fields = ('id', 'english_word', 'english_meaning','hindi_word','hindi_meaning','sanskrit_word','sanskrit_meaning','chinese_word','chinese_meaning','marathi_word','marathi_meaning','tibetan_word','tibetan_meaning','date_created')
 dictionarywords_schema = DictionaryWordSchema()
 dictionarywords_schemas = DictionaryWordSchema(many=True)
 
@@ -118,17 +124,41 @@ def selectedLanguageAPI(selectedLanguage):
 def searchWord(selectedLanguage,word):
     processed_word = preprocess_text(word)
     lemmatized_word = lemmatize_text(processed_word)
-    allSearchWords = DictionaryWords.query.filter_by(language = selectedLanguage, word=lemmatized_word).first()
-    if not allSearchWords:
+    if selectedLanguage=='en':
+        searched_word = DictionaryWords.query.filter_by(english_word=lemmatized_word).first()
+    if selectedLanguage=='hi':
+        searched_word = DictionaryWords.query.filter_by(hindi_word=lemmatized_word).first()
+    if selectedLanguage=='sa':
+        searched_word = DictionaryWords.query.filter_by(sanskrit_word=lemmatized_word).first()
+    if selectedLanguage=='zh':
+        searched_word = DictionaryWords.query.filter_by(chinese_word=lemmatized_word).first()  
+    if selectedLanguage=='mr':
+        searched_word = DictionaryWords.query.filter_by(marathi_word=lemmatized_word).first() 
+    if selectedLanguage=='ti':
+        searched_word = DictionaryWords.query.filter_by(tibetan_word=lemmatized_word).first() 
+    
+    if not searched_word:
         return jsonify({'error': 'Word not found'}), 404
-    return dictionarywords_schema.jsonify(allSearchWords)
+    return dictionarywords_schema.jsonify(searched_word)
 
 #for Incremental search Suggestion
 @app.route('/api/suggestions/<string:selectedLanguage>/<string:input>', methods=['GET'])
 def get_suggestions(selectedLanguage, input):
     processed_input = preprocess_text(input)
     lemmatized_input = lemmatize_text(processed_input)
-    suggestions = DictionaryWords.query.filter_by(language=selectedLanguage).filter(DictionaryWords.word.like(f'{lemmatized_input}%')).all()
+    if selectedLanguage=='en':
+        suggestions = DictionaryWords.query.filter(DictionaryWords.english_word.like(f'{lemmatized_input}%')).all()
+    if selectedLanguage=='hi':
+        suggestions = DictionaryWords.query.filter(DictionaryWords.hindi_word.like(f'{lemmatized_input}%')).all() 
+    if selectedLanguage=='sa':
+        suggestions = DictionaryWords.query.filter(DictionaryWords.sanskrit_word.like(f'{lemmatized_input}%')).all()  
+    if selectedLanguage=='zh':
+        suggestions = DictionaryWords.query.filter(DictionaryWords.chinese_word.like(f'{lemmatized_input}%')).all()    
+    if selectedLanguage=='mr':
+        suggestions = DictionaryWords.query.filter(DictionaryWords.marathi_word.like(f'{lemmatized_input}%')).all()
+    if selectedLanguage=='ti':
+        suggestions = DictionaryWords.query.filter(DictionaryWords.tibetan_word.like(f'{lemmatized_input}%')).all()
+    
     return dictionarywords_schemas.jsonify(suggestions)
 
 #search history
@@ -239,7 +269,7 @@ def recognize_image(raw_image):
 def import_data():
     try:
         # Specify the path to your Excel file
-        excel_file_path = "C:/Users/abhi2/Desktop/a.xlsx"
+        excel_file_path = "C:/Users/abhi2/Desktop/abc.xlsx"
 
         # Read data from Excel using pandas
         df = pd.read_excel(excel_file_path)
@@ -247,15 +277,19 @@ def import_data():
         # Iterate through the rows and add each record to the database
         for index, row in df.iterrows():
             new_word = DictionaryWords(
-                language=row['Language'],
-                word=row['Word'],
+                english_word=row['English Word'],
                 english_meaning=row['English Meaning'],
+                hindi_word=row['Hindi Word'],
                 hindi_meaning=row['Hindi Meaning'],
+                sanskrit_word=row['Sanskrit Word'],
                 sanskrit_meaning=row['Sanskrit Meaning'],
+                chinese_word=row['Chinese Word'],
                 chinese_meaning=row['Chinese Meaning'],
+                marathi_word=row['Marathi Word'],
                 marathi_meaning=row['Marathi Meaning'],
+                tibetan_word=row['Tibetan Word'],
                 tibetan_meaning=row['Tibetan Meaning'],
-                pos=row['Pos'],
+                
             )
 
             db.session.add(new_word)

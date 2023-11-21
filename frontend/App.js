@@ -34,7 +34,7 @@ function DictionaryStack({ navigation }) {
 
   const registerHandler = () => {
     setModalVisible(false);
-    navigation.navigate("Register");
+    navigation.navigate("Register", { toggleModal: toggleModal });
   };
 
   return (
@@ -74,6 +74,9 @@ function DictionaryStack({ navigation }) {
         </Stack.Screen>
         <Stack.Screen name="Advanced Search" component={AdvanceSearch} />
         <Stack.Screen name="Register" component={Register} />
+        {/* <Stack.Screen name="Register">
+          {() => <Register toggleModal={toggleModal} />}
+        </Stack.Screen> */}
       </Stack.Navigator>
       <LoginModal
         modalVisible={modalVisible}
