@@ -5,6 +5,8 @@ from datetime import datetime
 import spacy
 from spacy.lang.en import English
 import pandas as pd
+from translate import Translator
+from googletrans import Translator as GoogleTranslator
 
 from PIL import Image
 from transformers import BlipProcessor, BlipForConditionalGeneration
@@ -301,8 +303,49 @@ def import_data():
 
     except Exception as e:
         return jsonify({"error": str(e)})
+    
+# Translator for English, Hindi, Chinese, and Marathi
+google_translator = GoogleTranslator()
 
+def translate_sentence_google(sentence, target_language='en'):
+    translation = google_translator.translate(sentence, dest=target_language)
+    return translation.text
 
+# Translator for Sanskrit and Tibetan
+def translate_sentence_other(sentence, target_language='en'):
+    translator = Translator(to_lang=target_language)
+    translation = translator.translate(sentence)
+    return translation
+
+def translate_sentence(sentence, target_language='en'):
+    if target_language in ['en', 'hi', 'zh-cn', 'mr']:
+        return translate_sentence_google(sentence, target_language)
+    elif target_language in ['ti', 'sa']:
+        return translate_sentence_other(sentence, target_language)
+    else:
+        return 'Unsupported target language'
+
+# Translate route
+@app.route('/translate', methods=['POST'])
+def translate():
+    try:
+        data = request.get_json()
+        sentence_to_translate = data.get('sentence')
+        target_language = data.get('target_language')
+
+        if not sentence_to_translate:
+            return jsonify({'error': 'Please provide a sentence to translate'}), 400
+
+        # If target_language is not provided, default to English ('en')
+        target_language = target_language or 'en'
+
+        # Call the appropriate translation method based on the target language
+        translated_sentence = translate_sentence(sentence_to_translate, target_language)
+
+        return jsonify({'original_sentence': sentence_to_translate, 'translated_sentence': translated_sentence})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
     app.run(port= 3000, debug=True)

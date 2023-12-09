@@ -62,7 +62,7 @@ export default function ImageSearch() {
 
     try {
       const response = await fetch(
-        "https://7871-2402-e280-3e4b-4e2-2164-be1f-d5c7-8697.ngrok-free.app/image-upload",
+        "https://761b-2402-e280-3e4b-4e2-8119-93bc-308f-642c.ngrok-free.app/image-upload",
         {
           method: "POST",
           body: formData,

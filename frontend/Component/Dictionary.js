@@ -14,6 +14,7 @@ import { Picker } from "@react-native-picker/picker";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 import ImageSearch from "./ImageSearch";
+import Translator from "./Translator";
 
 export default function Dictionary({ route, navigation, username }) {
   const [input, setInput] = useState("");
@@ -54,11 +55,11 @@ export default function Dictionary({ route, navigation, username }) {
 
     // Fetch suggestions based on input
     fetch(
-      `https://2c00-2409-40e4-2b-ba40-b1be-1e77-1a0f-5b1e.ngrok-free.app/api/suggestions/${selectedLanguage}/${searchWord}`
+      `https://761b-2402-e280-3e4b-4e2-8119-93bc-308f-642c.ngrok-free.app/api/suggestions/${selectedLanguage}/${searchWord}`
     )
       .then((resp) => resp.json())
       .then((data) => {
-        //console.log(data);
+        console.log(data);
         setSuggestions(data); // Set the suggestions state
       })
       .catch(function (error) {
@@ -71,7 +72,7 @@ export default function Dictionary({ route, navigation, username }) {
     if (input) {
       setWord("");
       fetch(
-        `https://2c00-2409-40e4-2b-ba40-b1be-1e77-1a0f-5b1e.ngrok-free.app/api/${selectedLanguage}/${input}`,
+        `https://761b-2402-e280-3e4b-4e2-8119-93bc-308f-642c.ngrok-free.app/api/${selectedLanguage}/${input}`,
         {
           method: "GET",
           headers: {
@@ -119,7 +120,7 @@ export default function Dictionary({ route, navigation, username }) {
         };
 
         fetch(
-          "https://7871-2402-e280-3e4b-4e2-2164-be1f-d5c7-8697.ngrok-free.app/history",
+          "https://761b-2402-e280-3e4b-4e2-8119-93bc-308f-642c.ngrok-free.app/history",
           {
             method: "POST",
             headers: {
@@ -143,7 +144,7 @@ export default function Dictionary({ route, navigation, username }) {
   useEffect(() => {
     if (username) {
       fetch(
-        "https://7871-2402-e280-3e4b-4e2-2164-be1f-d5c7-8697.ngrok-free.app/recent",
+        "https://761b-2402-e280-3e4b-4e2-8119-93bc-308f-642c.ngrok-free.app/recent",
         {
           method: "POST",
           headers: {
@@ -161,7 +162,7 @@ export default function Dictionary({ route, navigation, username }) {
           console.error("Error fetching recent history:", error);
         });
     }
-  }, [username, word]);
+  }, [username, input]);
 
   useEffect(() => {
     if (selectedLanguage == "en") {
@@ -275,6 +276,13 @@ export default function Dictionary({ route, navigation, username }) {
         </TouchableOpacity>
         <ImageSearch />
       </View>
+      <Translator />
+
+      {/* <View style={styles.translatorContainer}>
+        <TouchableOpacity style={styles.translatorBtn}>
+          <Text style={styles.translatorText}>Translator</Text>
+        </TouchableOpacity>
+      </View> */}
       <View style={styles.wordMeaningBox}>
         <View style={styles.wordBox}>
           <Text style={styles.baseWordMeaning}>Word</Text>
@@ -457,6 +465,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  translatorBtn: {
+    width: "30%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  translatorText: {
+    fontSize: 17,
+    fontWeight: "700",
+    borderBottomWidth: 1,
+    borderColor: "black",
+  },
+
   wordMeaningBox: {
     display: "flex",
     flexDirection: "row",
@@ -581,7 +603,7 @@ const styles = StyleSheet.create({
     fontWeight: "400",
   },
   recentContainer: {
-    height: 220,
+    height: 190,
     marginTop: 16,
     backgroundColor: "rgba(255, 255, 224, 1)",
     borderRadius: 5,
