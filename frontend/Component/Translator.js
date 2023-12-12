@@ -7,6 +7,8 @@ import {
   StyleSheet,
   TextInput,
 } from "react-native";
+import * as Clipboard from "expo-clipboard";
+
 import { Picker } from "@react-native-picker/picker";
 import Icon from "react-native-vector-icons/FontAwesome";
 
@@ -15,13 +17,24 @@ export default function Translator() {
   const [selectedLanguage, setSelecteLanguage] = useState("en");
   const [input, setInput] = useState("");
   const [translatedResult, setTranslatedResult] = useState("");
+  const [copiedData, setCopiedData] = useState("");
 
   function modalHandler() {
+    setInput("");
+    setTranslatedResult("");
+    setCopiedData("");
+    setSelecteLanguage("");
     setModal(!modal);
   }
 
   function inputHandler(e) {
     setInput(e.trim());
+  }
+  function copyHandler() {
+    if (translatedResult) {
+      Clipboard.setStringAsync(translatedResult);
+      setCopiedData(translatedResult);
+    }
   }
 
   function translateHandler() {
@@ -49,6 +62,7 @@ export default function Translator() {
         .catch((error) => {
           console.error("Seach history Error:", error);
         });
+      setCopiedData("");
     }
   }
 
@@ -101,8 +115,23 @@ export default function Translator() {
           </View>
 
           <View style={styles.resultContainer}>
-            <Text style={styles.result}>{translatedResult}</Text>
+            <Text style={styles.result} selectable={true}>
+              {translatedResult}
+            </Text>
           </View>
+          <View style={styles.copyView}>
+            <TouchableOpacity
+              style={styles.copyContainer}
+              onPress={copyHandler}
+            >
+              {copiedData ? (
+                <Text style={styles.copyText}>Copied</Text>
+              ) : (
+                <Text style={styles.copyText}>Copy</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.closeModalIcon}>
             <TouchableOpacity onPress={modalHandler}>
               <Icon name="times" size={50} color="#2B2B2B" />
@@ -192,9 +221,35 @@ const styles = StyleSheet.create({
   result: {
     fontSize: 18,
   },
+  copyView: {
+    width: 330,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "flex-end",
+  },
+
+  copyContainer: {
+    width: "25%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "red",
+    marginVertical: 7,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    backgroundColor: "rgba(57, 57, 1, 1)",
+  },
+  copyText: {
+    fontSize: 15,
+    letterSpacing: 0.5,
+    color: "white",
+    fontWeight: "500",
+  },
+
   closeModalIcon: {
     width: 80,
-    marginTop: 210,
+    marginTop: 180,
     paddingHorizontal: 20,
     paddingVertical: 15,
     backgroundColor: "#FBFAF5",
