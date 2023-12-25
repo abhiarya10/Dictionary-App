@@ -26,33 +26,29 @@ model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-capt
 
 class DictionaryWords(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    english_word = db.Column(db.String(100), nullable=True)
-    english_meaning = db.Column(db.String(200), nullable=True)
-    hindi_word = db.Column(db.String(100), nullable=True)
-    hindi_meaning = db.Column(db.String(100), nullable=True)
-    chinese_word = db.Column(db.String(100), nullable=True)
-    chinese_meaning = db.Column(db.String(100), nullable=True)
-    tibetan_word = db.Column(db.String(100), nullable=True)
-    tibetan_meaning = db.Column(db.String(100), nullable=True)
-    marathi_word = db.Column(db.String(100), nullable=True)
-    marathi_meaning = db.Column(db.String(100), nullable=True)
-    sanskrit_word = db.Column(db.String(100), nullable=True)
-    sanskrit_meaning = db.Column(db.String(100), nullable=True)
+    language = db.Column(db.String(100), nullable=True)
+    word = db.Column(db.String(100), nullable=True)
+    parallel_form = db.Column(db.String(100), nullable=True)
+    meaning1 = db.Column(db.String(100), nullable=True)
+    gender1 = db.Column(db.String(20), nullable=True)
+    meaning2 = db.Column(db.String(100), nullable=True)
+    gender2 = db.Column(db.String(20), nullable=True)
+    citations = db.Column(db.String(100), nullable=True)
+    additional_info = db.Column(db.String(100), nullable=True)
+    dictionary_used = db.Column(db.String(100), nullable=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __init__(self, english_word, english_meaning, hindi_word, hindi_meaning, chinese_word, chinese_meaning, marathi_word, marathi_meaning, tibetan_word, tibetan_meaning, sanskrit_word, sanskrit_meaning):
-        self.english_word = english_word
-        self.english_meaning = english_meaning
-        self.hindi_word = hindi_word
-        self.hindi_meaning = hindi_meaning
-        self.chinese_word = chinese_word
-        self.chinese_meaning = chinese_meaning
-        self.tibetan_word = tibetan_word
-        self.tibetan_meaning = tibetan_meaning
-        self.marathi_word = marathi_word
-        self.marathi_meaning = marathi_meaning
-        self.sanskrit_word = sanskrit_word
-        self.sanskrit_meaning = sanskrit_meaning
+    def __init__(self, language, word, parallel_form, meaning1, gender1, meaning2, gender2, citation, additional_info, dictionary_used):
+        self.language = language
+        self.word = word
+        self.parallel_form = parallel_form
+        self.meaning1 = meaning1
+        self.gender1 = gender1
+        self.meaning2 = meaning2
+        self.gender2 = gender2
+        self.citation = citation
+        self.additional_info = additional_info
+        self.dictionary_used = dictionary_used
 
 class UserRegisterd(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -83,7 +79,7 @@ class SearchHistory(db.Model):
 
 class DictionaryWordSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'english_word', 'english_meaning','hindi_word','hindi_meaning','sanskrit_word','sanskrit_meaning','chinese_word','chinese_meaning','marathi_word','marathi_meaning','tibetan_word','tibetan_meaning','date_created')
+        fields = ('id', 'language', 'word','parallel_form','meaning1','gender1','meaning2','gender2','citations','additional_info','dictionary_used','date_created')
 dictionarywords_schema = DictionaryWordSchema()
 dictionarywords_schemas = DictionaryWordSchema(many=True)
 
@@ -148,19 +144,7 @@ def searchWord(selectedLanguage,word):
 def get_suggestions(selectedLanguage, input):
     processed_input = preprocess_text(input)
     lemmatized_input = lemmatize_text(processed_input)
-    if selectedLanguage=='en':
-        suggestions = DictionaryWords.query.filter(DictionaryWords.english_word.like(f'{lemmatized_input}%')).all()
-    if selectedLanguage=='hi':
-        suggestions = DictionaryWords.query.filter(DictionaryWords.hindi_word.like(f'{lemmatized_input}%')).all() 
-    if selectedLanguage=='sa':
-        suggestions = DictionaryWords.query.filter(DictionaryWords.sanskrit_word.like(f'{lemmatized_input}%')).all()  
-    if selectedLanguage=='zh':
-        suggestions = DictionaryWords.query.filter(DictionaryWords.chinese_word.like(f'{lemmatized_input}%')).all()    
-    if selectedLanguage=='mr':
-        suggestions = DictionaryWords.query.filter(DictionaryWords.marathi_word.like(f'{lemmatized_input}%')).all()
-    if selectedLanguage=='ti':
-        suggestions = DictionaryWords.query.filter(DictionaryWords.tibetan_word.like(f'{lemmatized_input}%')).all()
-    
+    suggestions = DictionaryWords.query.filter_by(language=selectedLanguage).filter(DictionaryWords.word.like(f'{lemmatized_input}%')).all()
     return dictionarywords_schemas.jsonify(suggestions)
 
 #search history
@@ -279,18 +263,16 @@ def import_data():
         # Iterate through the rows and add each record to the database
         for index, row in df.iterrows():
             new_word = DictionaryWords(
-                english_word=row['English Word'],
-                english_meaning=row['English Meaning'],
-                hindi_word=row['Hindi Word'],
-                hindi_meaning=row['Hindi Meaning'],
-                sanskrit_word=row['Sanskrit Word'],
-                sanskrit_meaning=row['Sanskrit Meaning'],
-                chinese_word=row['Chinese Word'],
-                chinese_meaning=row['Chinese Meaning'],
-                marathi_word=row['Marathi Word'],
-                marathi_meaning=row['Marathi Meaning'],
-                tibetan_word=row['Tibetan Word'],
-                tibetan_meaning=row['Tibetan Meaning'],
+                language=row['Language'],
+                word=row['Word'],
+                parallel_form=row['Parallel_form'],
+                meaning1=row['Meaning1'],
+                gender1=row['Gender1'],
+                meaning2=row['Meaning2'],
+                gender2=row['Gender2'],
+                citations=row['Citations'],
+                additional_info=row['Additional Info.'],
+                dictionary_used=row['Dictionaries used'],
                 
             )
 

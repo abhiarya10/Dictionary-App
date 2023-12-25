@@ -36,6 +36,9 @@ export default function Translator() {
       setCopiedData(translatedResult);
     }
   }
+  function clearInputHandler() {
+    setInput("");
+  }
 
   function translateHandler() {
     if (input) {
@@ -45,7 +48,7 @@ export default function Translator() {
       };
 
       fetch(
-        "https://761b-2402-e280-3e4b-4e2-8119-93bc-308f-642c.ngrok-free.app/translate",
+        "https://716f-2402-e280-3e4b-4e2-1451-d084-5cc-fe73.ngrok-free.app/translate",
         {
           method: "POST",
           headers: {
@@ -79,6 +82,12 @@ export default function Translator() {
               placeholder="Type sentence"
               //   onClearText={clearInput}
             />
+            <TouchableOpacity
+              style={styles.clearInputBtn}
+              onPress={clearInputHandler}
+            >
+              <Icon name="times" size={22} color="black" />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.pickerView}>
@@ -160,14 +169,26 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     fontWeight: "700",
   },
-
-  inputStyle: {
+  inputContainer: {
     width: 330,
-    paddingHorizontal: 15,
-    paddingVertical: 15,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 224, 1)",
     borderColor: "rgba(57, 57, 1, 1)",
     borderBottomWidth: 2,
     marginTop: 25,
+  },
+  clearInputBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 15,
+  },
+
+  inputStyle: {
+    width: 290,
+    paddingHorizontal: 15,
+    paddingVertical: 15,
     borderRadius: 5,
     fontSize: 20,
     backgroundColor: "rgba(255, 255, 224, 1)",
@@ -259,7 +280,7 @@ const styles = StyleSheet.create({
   },
 
   translatorBtn: {
-    width: "30%",
+    width: "90%",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -268,8 +289,9 @@ const styles = StyleSheet.create({
 
   translatorText: {
     fontSize: 17,
-    fontWeight: "700",
+    fontWeight: "800",
     borderBottomWidth: 1,
     borderColor: "black",
+    letterSpacing: 0.5,
   },
 });
