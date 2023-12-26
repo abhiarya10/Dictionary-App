@@ -25,7 +25,8 @@ model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-capt
 
 
 class DictionaryWords(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    count = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer)
     language = db.Column(db.String(100), nullable=True)
     word = db.Column(db.String(100), nullable=True)
     parallel_form = db.Column(db.String(100), nullable=True)
@@ -38,7 +39,8 @@ class DictionaryWords(db.Model):
     dictionary_used = db.Column(db.String(100), nullable=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __init__(self, language, word, parallel_form, meaning1, gender1, meaning2, gender2, citation, additional_info, dictionary_used):
+    def __init__(self, id, language, word, parallel_form, meaning1, gender1, meaning2, gender2, citation, additional_info, dictionary_used):
+        self.id = id
         self.language = language
         self.word = word
         self.parallel_form = parallel_form
@@ -79,7 +81,7 @@ class SearchHistory(db.Model):
 
 class DictionaryWordSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'language', 'word','parallel_form','meaning1','gender1','meaning2','gender2','citations','additional_info','dictionary_used','date_created')
+        fields = ('count','id', 'language', 'word','parallel_form','meaning1','gender1','meaning2','gender2','citations','additional_info','dictionary_used','date_created')
 dictionarywords_schema = DictionaryWordSchema()
 dictionarywords_schemas = DictionaryWordSchema(many=True)
 
@@ -122,22 +124,22 @@ def selectedLanguageAPI(selectedLanguage):
 def searchWord(selectedLanguage,word):
     processed_word = preprocess_text(word)
     lemmatized_word = lemmatize_text(processed_word)
-    if selectedLanguage=='en':
-        searched_word = DictionaryWords.query.filter_by(english_word=lemmatized_word).first()
-    if selectedLanguage=='hi':
-        searched_word = DictionaryWords.query.filter_by(hindi_word=lemmatized_word).first()
-    if selectedLanguage=='sa':
-        searched_word = DictionaryWords.query.filter_by(sanskrit_word=lemmatized_word).first()
-    if selectedLanguage=='zh':
-        searched_word = DictionaryWords.query.filter_by(chinese_word=lemmatized_word).first()  
-    if selectedLanguage=='mr':
-        searched_word = DictionaryWords.query.filter_by(marathi_word=lemmatized_word).first() 
-    if selectedLanguage=='ti':
-        searched_word = DictionaryWords.query.filter_by(tibetan_word=lemmatized_word).first() 
-    
-    if not searched_word:
+
+    searched_result = DictionaryWords.query.filter_by(language = selectedLanguage, word=lemmatized_word).first()
+    if not searched_result:
         return jsonify({'error': 'Word not found'}), 404
-    return dictionarywords_schema.jsonify(searched_word)
+    
+    searched_Word_id = searched_result.id
+    related_rows = DictionaryWords.query.filter_by(id = searched_Word_id)
+
+    # Convert the results to JSON
+    result_data = {
+    'searched_word': dictionarywords_schema.dump(searched_result),
+    'related_rows': dictionarywords_schemas.dump(related_rows)
+    }
+    
+    return jsonify(result_data)
+
 
 #for Incremental search Suggestion
 @app.route('/api/suggestions/<string:selectedLanguage>/<string:input>', methods=['GET'])
