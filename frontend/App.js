@@ -10,7 +10,8 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 
 import Dictionary from "./Component/Dictionary";
-import AdvanceSearch from "./Component/AdvanceSearch";
+import Translator from "./Component/Translator";
+import ImageSearch from "./Component/ImageSearch";
 import About from "./Component/About";
 import Contact from "./Component/Contact";
 import LoginModal from "./Component/LoginModal"; // Import the LoginModal component
@@ -72,7 +73,7 @@ function DictionaryStack({ navigation }) {
         >
           {() => <Dictionary username={username} />}
         </Stack.Screen>
-        <Stack.Screen name="Advanced Search" component={AdvanceSearch} />
+
         <Stack.Screen name="Register" component={Register} />
         {/* <Stack.Screen name="Register">
           {() => <Register toggleModal={toggleModal} />}
@@ -109,9 +110,10 @@ export default function App() {
         drawerContent={(props) => <CustomDrawerContent {...props} />}
       >
         <Drawer.Screen name="My Dictionary" component={DictionaryStack} />
+        <Drawer.Screen name="Translator" component={Translator} />
+        <Drawer.Screen name="Image Search" component={ImageSearch} />
         <Drawer.Screen name="About us" component={About} />
         <Drawer.Screen name="Contact us" component={Contact} />
-        <Drawer.Screen name="Advanced Search" component={AdvanceSearch} />
       </Drawer.Navigator>
     </NavigationContainer>
   );

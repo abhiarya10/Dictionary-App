@@ -20,13 +20,14 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+        "gradle": "6.7.1"
       },
       "permissions": [
         "android.permission.RECORD_AUDIO"
-      ]
+      ],
+      "package": "com.abhi_2018_arya.nlp_project"
     },
-    
     "web": {
       "favicon": "./assets/favicon.png"
     },
@@ -38,6 +39,11 @@
           "speechRecognitionPermission": "CUSTOM: Allow $(PRODUCT_NAME) to securely recognize user speech"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c579b78a-a6de-44c2-a155-1b34395dd638"
+      }
+    }
   }
 }

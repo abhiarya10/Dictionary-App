@@ -20,8 +20,10 @@ export default function Dictionary({ route, navigation, username }) {
   const [input, setInput] = useState("");
   const [word, setWord] = useState("");
   const [meaning1, setMeaning1] = useState("");
+  const [meaning2, setMeaning2] = useState("");
   const [parallelForm, setParallelForm] = useState("");
   const [gender1, setGender1] = useState("");
+  const [gender2, setGender2] = useState("");
   const [dictUsed, setDictUsed] = useState("");
   const [addtInfo, setAddtInfo] = useState("");
   const [citation, setCitation] = useState("");
@@ -35,6 +37,7 @@ export default function Dictionary({ route, navigation, username }) {
   const [chineseWord, setChineseWord] = useState("");
   const [tibetanWord, setTibetanWord] = useState("");
   const [sanskritWord, setSanskritWord] = useState("");
+  const [paliWord, setPaliWord] = useState("");
 
   function closeDropdown() {
     setLanguageDropdownView(false);
@@ -56,7 +59,7 @@ export default function Dictionary({ route, navigation, username }) {
     )
       .then((resp) => resp.json())
       .then((data) => {
-        console.log(data);
+        console.log("suggestion", data);
         setSuggestions(data); // Set the suggestions state
       })
       .catch(function (error) {
@@ -68,6 +71,20 @@ export default function Dictionary({ route, navigation, username }) {
   function searchHandler() {
     if (input) {
       setWord(input);
+      setCitation("");
+      setDictUsed("");
+      setMeaning1("");
+      setGender1("");
+      setParallelForm("");
+      setAddtInfo("");
+      setEnglishWord("");
+      setHindiWord("");
+      setSanskritWord("");
+      setPaliWord("");
+      setMarathiWord("");
+      setChineseWord("");
+      setTibetanWord("");
+
       fetch(
         `https://20d7-2402-e280-3e4b-4e2-55f0-4b8f-8147-45b6.ngrok-free.app/api/${selectedLanguage}/${input}`,
         {
@@ -80,20 +97,46 @@ export default function Dictionary({ route, navigation, username }) {
         .then((resp) => resp.json())
         .then((data) => {
           if (data.error) {
-            setWord("Word not found");
+            setWord("Word not found error");
           } else {
             setCitation(data.searched_word.citations);
             setDictUsed(data.searched_word.dictionary_used);
             setMeaning1(data.searched_word.meaning1);
+            setMeaning2(data.searched_word.meaning2);
             setGender1(data.searched_word.gender1);
+            setGender2(data.searched_word.gender2);
             setParallelForm(data.searched_word.parallel_form);
             setAddtInfo(data.searched_word.additional_info);
-            setEnglishWord(data.related_rows[1].word);
-            setHindiWord(data.related_rows[0].word);
-            setChineseWord(data.related_rows[4].word);
-            setMarathiWord(data.related_rows[3].word);
-            setSanskritWord(data.related_rows[2].word);
-            setTibetanWord(data.related_rows[5].word);
+
+            // Loop through related_rows and set words based on language
+            data.related_rows.forEach((row) => {
+              switch (row.language) {
+                case "en":
+                  setEnglishWord(row.word);
+                  break;
+                case "hi":
+                  setHindiWord(row.word);
+                  break;
+                case "zh":
+                  setChineseWord(row.word);
+                  break;
+                case "ti":
+                  setTibetanWord(row.word);
+                  break;
+                case "sa":
+                  setSanskritWord(row.word);
+                  break;
+                case "mr":
+                  setMarathiWord(row.word);
+                  break;
+                case "pi":
+                  setPaliWord(row.word);
+                  break;
+                default:
+                  // Handle unknown language or set a default behavior
+                  break;
+              }
+            });
 
             console.log("Search words:- ", data); // Handle the response data from the backend if needed
           }
@@ -104,6 +147,7 @@ export default function Dictionary({ route, navigation, username }) {
               error.message
           );
         });
+
       setInput("");
 
       //http post request to history endpoint for setting search history
@@ -118,7 +162,7 @@ export default function Dictionary({ route, navigation, username }) {
         };
 
         fetch(
-          "https://716f-2402-e280-3e4b-4e2-1451-d084-5cc-fe73.ngrok-free.app/history",
+          "https://20d7-2402-e280-3e4b-4e2-55f0-4b8f-8147-45b6.ngrok-free.app/history",
           {
             method: "POST",
             headers: {
@@ -142,7 +186,7 @@ export default function Dictionary({ route, navigation, username }) {
   useEffect(() => {
     if (username) {
       fetch(
-        "https://716f-2402-e280-3e4b-4e2-1451-d084-5cc-fe73.ngrok-free.app/recent",
+        "https://20d7-2402-e280-3e4b-4e2-55f0-4b8f-8147-45b6.ngrok-free.app/recent",
         {
           method: "POST",
           headers: {
@@ -191,6 +235,7 @@ export default function Dictionary({ route, navigation, username }) {
             <Picker.Item label="Chinese" value="zh" />
             <Picker.Item label="Marathi" value="mr" />
             <Picker.Item label="Tibetan" value="ti" />
+            <Picker.Item label="Pali" value="pi" />
           </Picker>
         </View>
 
@@ -238,19 +283,42 @@ export default function Dictionary({ route, navigation, username }) {
           <Text style={styles.parallelFormsText}>Parallel forms :</Text>
           <Text style={styles.wordResult}>{parallelForm}</Text>
         </View>
-        <View style={styles.parallelFormsContainer}>
-          <Text style={styles.parallelFormsText}>Meaning no :</Text>
-          <Text style={styles.parallelFormsResult}>1</Text>
-        </View>
-        <View style={styles.parallelFormsContainer}>
-          <Text style={styles.parallelFormsText}>Gender :</Text>
-          <Text style={styles.parallelFormsResult}>{gender1}</Text>
+        <View style={styles.mainMeaningContainer}>
+          <View style={styles.parallelFormsContainer}>
+            <Text style={styles.parallelFormsText}>Meaning no :</Text>
+            <Text style={styles.parallelFormsResult}>1</Text>
+          </View>
+          <View style={styles.parallelFormsContainer}>
+            <Text style={styles.parallelFormsText}>Gender :</Text>
+            <Text style={styles.parallelFormsResult}>{gender1}</Text>
+          </View>
+          <View style={styles.meaningBox}>
+            <Text style={styles.meaningText}>Meaning</Text>
+            <View style={styles.meaningResult}>
+              <Text style={styles.meaningResultText} selectable={true}>
+                {meaning1}
+              </Text>
+            </View>
+          </View>
         </View>
 
-        <View style={styles.meaningBox}>
-          <Text style={styles.meaningText}>Meaning</Text>
-          <View style={styles.meaningResult}>
-            <Text style={styles.meaningResultText}>{meaning1}</Text>
+        <View style={styles.mainMeaningContainer}>
+          <View style={styles.parallelFormsContainer}>
+            <Text style={styles.parallelFormsText}>Meaning no :</Text>
+            <Text style={styles.parallelFormsResult}>2</Text>
+          </View>
+          <View style={styles.parallelFormsContainer}>
+            <Text style={styles.parallelFormsText}>Gender :</Text>
+            <Text style={styles.parallelFormsResult}>{gender2}</Text>
+          </View>
+
+          <View style={styles.meaningBox}>
+            <Text style={styles.meaningText}>Meaning</Text>
+            <View style={styles.meaningResult}>
+              <Text style={styles.meaningResultText} selectable={true}>
+                {meaning2}
+              </Text>
+            </View>
           </View>
         </View>
         <View style={styles.parallelFormsContainer}>
@@ -265,7 +333,9 @@ export default function Dictionary({ route, navigation, username }) {
 
         <View style={styles.citationContainer}>
           <Text style={styles.citationText}>Citations : </Text>
-          <Text style={styles.citations}>{citation}</Text>
+          <Text style={styles.citations} selectable={true}>
+            {citation}
+          </Text>
         </View>
 
         <View style={styles.wordsContainer}>
@@ -296,6 +366,10 @@ export default function Dictionary({ route, navigation, username }) {
             <View style={styles.allWords}>
               <Text style={styles.eachWord}>Tibetan :-</Text>
               <Text style={styles.eachWord}> {tibetanWord}</Text>
+            </View>
+            <View style={styles.allWords}>
+              <Text style={styles.eachWord}>Pali :-</Text>
+              <Text style={styles.eachWord}> {paliWord}</Text>
             </View>
           </View>
         </View>
@@ -338,12 +412,12 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-
+    width: "100%",
     borderRadius: 5,
   },
 
   inputStyle: {
-    width: 247,
+    flex: 1,
     backgroundColor: "rgba(255, 255, 224, 1)",
     paddingHorizontal: 15,
     paddingVertical: 13,
@@ -449,7 +523,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "500",
   },
-
+  mainMeaningContainer: {
+    marginTop: 10,
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+    paddingTop: 5,
+    backgroundColor: "rgba(255, 255, 204, 1)",
+    borderRadius: 5,
+    elevation: 5,
+    shadowColor: "#171717",
+  },
   meaningBox: {
     marginTop: 10,
     borderRadius: 5,
