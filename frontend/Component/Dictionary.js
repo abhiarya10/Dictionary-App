@@ -9,7 +9,7 @@ import {
   Modal,
   ScrollView,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Picker } from "@react-native-picker/picker";
 import Icon from "react-native-vector-icons/FontAwesome";
 
@@ -28,7 +28,7 @@ export default function Dictionary({ route, navigation, username }) {
   const [addtInfo, setAddtInfo] = useState("");
   const [citation, setCitation] = useState("");
 
-  const [selectedLanguage, setSelecteLanguage] = useState("en");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [recent, setRecent] = useState([]);
   const [englishWord, setEnglishWord] = useState("");
@@ -39,13 +39,15 @@ export default function Dictionary({ route, navigation, username }) {
   const [sanskritWord, setSanskritWord] = useState("");
   const [paliWord, setPaliWord] = useState("");
 
+  const scrollViewRef = useRef(); //for scrolling to top
+
   function closeDropdown() {
     setLanguageDropdownView(false);
   }
 
   function clearInput() {
     setInput("");
-    setSuggestions("");
+    setSuggestions([]); // Set it back to an empty array
   }
 
   function inputHandler(event) {
@@ -55,7 +57,7 @@ export default function Dictionary({ route, navigation, username }) {
 
     // Fetch suggestions based on input
     fetch(
-      `https://20d7-2402-e280-3e4b-4e2-55f0-4b8f-8147-45b6.ngrok-free.app/api/suggestions/${selectedLanguage}/${searchWord}`
+      `https://70a6-2402-e280-3e4b-4e2-c039-a1ec-ab60-d01b.ngrok-free.app/api/suggestions/${selectedLanguage}/${searchWord}`
     )
       .then((resp) => resp.json())
       .then((data) => {
@@ -70,7 +72,7 @@ export default function Dictionary({ route, navigation, username }) {
   //search from database
   function searchHandler() {
     if (input) {
-      setWord(input);
+      setWord("");
       setCitation("");
       setDictUsed("");
       setMeaning1("");
@@ -86,7 +88,7 @@ export default function Dictionary({ route, navigation, username }) {
       setTibetanWord("");
 
       fetch(
-        `https://20d7-2402-e280-3e4b-4e2-55f0-4b8f-8147-45b6.ngrok-free.app/api/${selectedLanguage}/${input}`,
+        `https://70a6-2402-e280-3e4b-4e2-c039-a1ec-ab60-d01b.ngrok-free.app/api/${selectedLanguage}/${input}`,
         {
           method: "GET",
           headers: {
@@ -99,6 +101,7 @@ export default function Dictionary({ route, navigation, username }) {
           if (data.error) {
             setWord("Word not found error");
           } else {
+            setWord(input);
             setCitation(data.searched_word.citations);
             setDictUsed(data.searched_word.dictionary_used);
             setMeaning1(data.searched_word.meaning1);
@@ -162,7 +165,7 @@ export default function Dictionary({ route, navigation, username }) {
         };
 
         fetch(
-          "https://20d7-2402-e280-3e4b-4e2-55f0-4b8f-8147-45b6.ngrok-free.app/history",
+          "https://70a6-2402-e280-3e4b-4e2-c039-a1ec-ab60-d01b.ngrok-free.app/history",
           {
             method: "POST",
             headers: {
@@ -184,9 +187,26 @@ export default function Dictionary({ route, navigation, username }) {
 
   //useEffect for display recents whenever user login or new words being searched
   useEffect(() => {
+    setWord(input);
+    setCitation("");
+    setDictUsed("");
+    setMeaning1("");
+    setGender1("");
+    setMeaning2("");
+    setGender2("");
+    setParallelForm("");
+    setAddtInfo("");
+    setEnglishWord("");
+    setHindiWord("");
+    setSanskritWord("");
+    setPaliWord("");
+    setMarathiWord("");
+    setChineseWord("");
+    setTibetanWord("");
+
     if (username) {
       fetch(
-        "https://20d7-2402-e280-3e4b-4e2-55f0-4b8f-8147-45b6.ngrok-free.app/recent",
+        "https://70a6-2402-e280-3e4b-4e2-c039-a1ec-ab60-d01b.ngrok-free.app/recent",
         {
           method: "POST",
           headers: {
@@ -198,7 +218,7 @@ export default function Dictionary({ route, navigation, username }) {
         .then((response) => response.json())
         .then((data) => {
           console.log("User history: ", data);
-          setRecent(data);
+          setRecent(data.reverse());
         })
         .catch((error) => {
           console.error("Error fetching recent history:", error);
@@ -206,9 +226,88 @@ export default function Dictionary({ route, navigation, username }) {
     }
   }, [username, input]);
 
-  function languageMeaningHandler(language) {
-    setLanguageDropdown(language);
-    setLanguageDropdownView(false);
+  function meaningSetterHandler(language, word) {
+    setWord(word);
+    setWord(input);
+    setCitation("");
+    setDictUsed("");
+    setMeaning1("");
+    setGender1("");
+    setMeaning2("");
+    setGender2("");
+    setParallelForm("");
+    setAddtInfo("");
+
+    if (!word) {
+      setWord("Please type word");
+    }
+    // Trigger a new search based on the word and selected language
+    if (word) {
+      fetch(
+        `https://70a6-2402-e280-3e4b-4e2-c039-a1ec-ab60-d01b.ngrok-free.app/api/${language}/${word}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+        .then((resp) => resp.json())
+        .then((data) => {
+          if (data.error) {
+            setWord("Word not found error");
+          } else {
+            setWord(word);
+            setCitation(data.searched_word.citations);
+            setDictUsed(data.searched_word.dictionary_used);
+            setMeaning1(data.searched_word.meaning1);
+            setMeaning2(data.searched_word.meaning2);
+            setGender1(data.searched_word.gender1);
+            setGender2(data.searched_word.gender2);
+            setParallelForm(data.searched_word.parallel_form);
+            setAddtInfo(data.searched_word.additional_info);
+
+            // Loop through related_rows and set words based on language
+            data.related_rows.forEach((row) => {
+              switch (row.language) {
+                case "en":
+                  setEnglishWord(row.word);
+                  break;
+                case "hi":
+                  setHindiWord(row.word);
+                  break;
+                case "zh":
+                  setChineseWord(row.word);
+                  break;
+                case "ti":
+                  setTibetanWord(row.word);
+                  break;
+                case "sa":
+                  setSanskritWord(row.word);
+                  break;
+                case "mr":
+                  setMarathiWord(row.word);
+                  break;
+                case "pi":
+                  setPaliWord(row.word);
+                  break;
+                default:
+                  // Handle unknown language or set a default behavior
+                  break;
+              }
+            });
+
+            console.log("Search words:- ", data); // Handle the response data from the backend if needed
+          }
+        })
+        .catch(function (error) {
+          console.error(
+            "There has been a problem with your search operation: " +
+              error.message
+          );
+        });
+    }
+    scrollViewRef.current.scrollTo({ y: 0, animated: true, duration: 5000 });
   }
 
   function capitalizeWord(str) {
@@ -216,13 +315,13 @@ export default function Dictionary({ route, navigation, username }) {
   }
 
   return (
-    <ScrollView>
+    <ScrollView ref={scrollViewRef}>
       <View style={styles.mainContainer}>
         <View style={styles.pickerView}>
           <Picker
             selectedValue={selectedLanguage}
             onValueChange={(itemValue, itemIndex) =>
-              setSelecteLanguage(itemValue)
+              setSelectedLanguage(itemValue)
             }
             style={styles.picker}
             dropdownIconColor="red"
@@ -244,9 +343,23 @@ export default function Dictionary({ route, navigation, username }) {
             style={styles.inputStyle}
             onChangeText={inputHandler}
             defaultValue={input}
-            placeholder={
-              selectedLanguage === "hi" ? "Type hindi word" : "Type word"
-            }
+            placeholder={`Type ${
+              selectedLanguage === "hi"
+                ? "Hindi word"
+                : selectedLanguage === "en"
+                ? "English word"
+                : selectedLanguage === "sa"
+                ? "Sanskrit word"
+                : selectedLanguage === "zh"
+                ? "Chinese word"
+                : selectedLanguage === "mr"
+                ? "Marathi word"
+                : selectedLanguage === "ti"
+                ? "Tibetan word"
+                : selectedLanguage === "pi"
+                ? "Pali word"
+                : "Word"
+            }`}
             onClearText={clearInput}
           />
 
@@ -345,47 +458,93 @@ export default function Dictionary({ route, navigation, username }) {
           <View style={styles.allWordsContainer}>
             <View style={styles.allWords}>
               <Text style={styles.eachWord}>English :-</Text>
-              <Text style={styles.eachWord}> {englishWord}</Text>
+              <TouchableOpacity
+                style={styles.eachWordMeaningBtn}
+                onPress={() => meaningSetterHandler("en", englishWord)}
+              >
+                <Text style={styles.eachWordMeaning}> {englishWord}</Text>
+              </TouchableOpacity>
             </View>
             <View style={styles.allWords}>
               <Text style={styles.eachWord}>Hindi :-</Text>
-              <Text style={styles.eachWord}> {hindiWord}</Text>
+              <TouchableOpacity
+                style={styles.eachWordMeaningBtn}
+                onPress={() => meaningSetterHandler("hi", hindiWord)}
+              >
+                <Text style={styles.eachWordMeaning}> {hindiWord}</Text>
+              </TouchableOpacity>
             </View>
             <View style={styles.allWords}>
               <Text style={styles.eachWord}>Sanskrit :-</Text>
-              <Text style={styles.eachWord}> {sanskritWord}</Text>
+              <TouchableOpacity
+                style={styles.eachWordMeaningBtn}
+                onPress={() => meaningSetterHandler("sa", sanskritWord)}
+              >
+                <Text style={styles.eachWordMeaning}> {sanskritWord}</Text>
+              </TouchableOpacity>
             </View>
             <View style={styles.allWords}>
               <Text style={styles.eachWord}>Chinese :-</Text>
-              <Text style={styles.eachWord}> {chineseWord}</Text>
+              <TouchableOpacity
+                style={styles.eachWordMeaningBtn}
+                onPress={() => meaningSetterHandler("zh", chineseWord)}
+              >
+                <Text style={styles.eachWordMeaning}> {chineseWord}</Text>
+              </TouchableOpacity>
             </View>
             <View style={styles.allWords}>
               <Text style={styles.eachWord}>Marathi :-</Text>
-              <Text style={styles.eachWord}> {marathiWord}</Text>
+              <TouchableOpacity
+                style={styles.eachWordMeaningBtn}
+                onPress={() => meaningSetterHandler("mr", marathiWord)}
+              >
+                <Text style={styles.eachWordMeaning}> {marathiWord}</Text>
+              </TouchableOpacity>
             </View>
             <View style={styles.allWords}>
               <Text style={styles.eachWord}>Tibetan :-</Text>
-              <Text style={styles.eachWord}> {tibetanWord}</Text>
+              <TouchableOpacity
+                style={styles.eachWordMeaningBtn}
+                onPress={() => meaningSetterHandler("ti", tibetanWord)}
+              >
+                <Text style={styles.eachWordMeaning}> {tibetanWord}</Text>
+              </TouchableOpacity>
             </View>
             <View style={styles.allWords}>
               <Text style={styles.eachWord}>Pali :-</Text>
-              <Text style={styles.eachWord}> {paliWord}</Text>
+              <TouchableOpacity
+                style={styles.eachWordMeaningBtn}
+                onPress={() => meaningSetterHandler("pi", paliWord)}
+              >
+                <Text style={styles.eachWordMeaning}> {paliWord}</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
 
         <View style={styles.recentContainer}>
-          <Text style={styles.recentText}>Recents</Text>
-          {username && (
-            <FlatList
-              data={recent.reverse().slice(0, 30)}
-              renderItem={({ item }) => {
-                return (
-                  <Text style={styles.recentwords}>{item.searched_word}</Text>
-                );
-              }}
-              keyExtractor={(item, index) => index.toString()}
-            />
+          {username ? (
+            <>
+              <Text style={styles.recentText}>
+                {username}'s Recent searches
+              </Text>
+              <FlatList
+                data={recent.slice(0, 30)}
+                renderItem={({ item }) => {
+                  return (
+                    <Text style={styles.recentwords}>{item.searched_word}</Text>
+                  );
+                }}
+                keyExtractor={(item, index) => index.toString()}
+              />
+            </>
+          ) : (
+            <View>
+              <Text style={styles.recentText}>Recent searches</Text>
+              <Text style={styles.loginMSG}>
+                Login to see your recent searches
+              </Text>
+            </View>
           )}
         </View>
       </View>
@@ -592,6 +751,18 @@ const styles = StyleSheet.create({
     fontSize: 17,
     marginRight: 10,
   },
+  eachWordMeaningBtn: {
+    backgroundColor: "rgba(255, 255, 224, 1)",
+    borderRadius: 5,
+    elevation: 5,
+    shadowColor: "#52006A",
+    paddingHorizontal: 5,
+    paddingVertical: 5,
+  },
+
+  eachWordMeaning: {
+    fontSize: 17,
+  },
   allWordsContainer: {
     paddingBottom: 5,
   },
@@ -603,7 +774,7 @@ const styles = StyleSheet.create({
   },
 
   recentContainer: {
-    height: 190,
+    height: 240,
     marginTop: 10,
     backgroundColor: "rgba(255, 255, 224, 1)",
     borderRadius: 5,
@@ -634,5 +805,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: "rgba(184, 185, 181, 0.34)",
     color: "#858486",
+  },
+
+  loginMSG: {
+    marginTop: 60,
+    paddingVertical: 11.6,
+    fontSize: 17,
+    fontWeight: "500",
+    color: "#858486",
+    textAlign: "center",
   },
 });

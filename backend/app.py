@@ -140,7 +140,6 @@ def searchWord(selectedLanguage,word):
     
     return jsonify(result_data)
 
-
 #for Incremental search Suggestion
 @app.route('/api/suggestions/<string:selectedLanguage>/<string:input>', methods=['GET'])
 def get_suggestions(selectedLanguage, input):
