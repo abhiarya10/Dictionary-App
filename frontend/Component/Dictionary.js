@@ -28,7 +28,7 @@ export default function Dictionary({ route, navigation, username }) {
   const [addtInfo, setAddtInfo] = useState("");
   const [citation, setCitation] = useState("");
 
-  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [suggestions, setSuggestions] = useState([]);
   const [recent, setRecent] = useState([]);
   const [englishWord, setEnglishWord] = useState("");
